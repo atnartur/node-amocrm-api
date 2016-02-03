@@ -34,19 +34,25 @@ module.exports = function buildClient (baseUrl) {
 			createContact: 'post /private/api/v2/json/contacts/set',
 
 			createLead: 'post /private/api/v2/json/leads/set',
-			getLeads: 'get /private/api/v2/json/leads/list'
+			getLeads: 'get /private/api/v2/json/leads/list',
+
+			createNote: 'post /private/api/v2/json/notes/set',
 		},
 
 		transformRequest: {
 			createTask: prepareCreateTask,
-			createContact: prepareCreateContact
+			createContact: prepareCreateContact,
+			createLead: prepareCreateLead,
+			createNote: prepareCreateNote
 		},
 		transformResponse: {
 			auth: storeAuth,
 			createTask: parseCreateTask,
 			getCurrentAccount: parseGetCurrentAccount,
 			getContactsList: parseContactsList,
-			createContact: parseCreateContact
+			createLead: parseCreateLead,
+			createContact: parseCreateContact,
+			createNote: parseCreateNote
 		}
 	});
 
@@ -97,4 +103,25 @@ function parseGetCurrentAccount (res) {
 function parseContactsList (res) {
 	assert(res.data.response.contacts && res.status === 200, 'Contacts list query error');
 	return res.data.response.contacts;
+}
+
+
+function prepareCreateLead (params, requestBody, opts) {
+	requestBody = { request: { leads: { add: [params] } } };
+	return [params, requestBody, opts];
+}
+
+function parseCreateLead (res) {
+	assert(res.data.response.leads.add.length && res.status === 200, 'Note is not added due to some error');
+	return res.data.response.leads.add[0];
+}
+
+function prepareCreateNote (params, requestBody, opts) {
+	requestBody = { request: { notes: { add: [params] } } };
+	return [params, requestBody, opts];
+}
+
+function parseCreateNote (res) {
+	assert(res.data.response.notes.add.length && res.status === 200, 'Note is not added due to some error');
+	return res.data.response.notes.add[0];
 }
